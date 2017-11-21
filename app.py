@@ -4,6 +4,7 @@ from flask import render_template, request, session, redirect, abort
 
 # from flask.ext.oidc import OpenIDConnect
 import google_openid
+import microsoft_openid
 import dns.resolver
 
 
@@ -15,6 +16,7 @@ app = Flask(__name__)
 app.config.from_object(Configuration)
 
 google = google_openid.OpenIdConnectClient(app)
+microsoft = microsoft_openid.OpenIdConnectClient(app)
 
 # This can all be moved to subapplication if things get complex
 @app.route('/')
@@ -36,18 +38,26 @@ def login():
     email = request.form['email']
     if email.find("@") != -1:
         domain = email[email.find("@")+1:]
-        answers = list(dns.resolver.query(domain, 'MX'))
-        answers.sort(key=lambda x:x.preference)
-        server = answers[0].exchange
-        error = server
-        return google.redirect(domain)
+        if google.detectGoogleSuite(domain):
+            return google.redirect(domain)
+        else:                
+            return microsoft.redirect(email)
     else:
         error = "Not a valid email address"
 
     return render_template('login.html', error=error)
 
+@app.route('/ms_oidc_callback', methods=["POST"])
+def microsoft_callback():
+    state = request.form['state']
+    id_token = request.form['id_token']
+    if state != session['state']:
+        abort(401)
+    claims = microsoft.get_claims(id_token)
+    return render_template('login.html', error=claims, email=claims['email'])
+
 @app.route('/oidc_callback')
-def callback():
+def google_callback():
     state = request.args.get('state', '')
     code = request.args.get('code', '')
     if state != session['state']:

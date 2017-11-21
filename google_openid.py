@@ -1,14 +1,31 @@
 from flask import render_template, request, session, redirect, abort
 from google.auth import jwt
+import dns.resolver
 
 import requests
 import hashlib
 import os
+import logging
 
 class OpenIdConnectClient(object):
     def __init__(self, app):
         self.client_id = app.config["CLIENT_ID"]
         self.client_secret = app.config["CLIENT_SECRET"]
+
+    def detectGoogleSuite(self, domain):
+        answers = list(dns.resolver.query(domain, 'MX'))
+        answers.sort(key=lambda x:x.preference)
+        server = answers[0].exchange
+        logging.warning("Looked up %s and MX record is: '%s'" % (domain,server))
+        if str(server) == "aspmx.l.google.com.":
+            return True
+        headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36'}
+        r = requests.get('https://www.google.com/a/%s/ServiceLogin?service=mail' % (domain), allow_redirects=False, headers=headers)
+        logging.warning("Requesting Google Login page %s = %s" % (r.url, r.status_code,))
+        if r.status_code == 302:
+            return True
+        return False
+
 
     def redirect(self, domain):
         state = hashlib.sha256(os.urandom(1024)).hexdigest()
