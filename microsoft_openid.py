@@ -4,6 +4,8 @@ from google.auth import jwt
 import requests
 import hashlib
 import os
+import logging
+
 
 class OpenIdConnectClient(object):
     def __init__(self, app):
@@ -29,4 +31,5 @@ class OpenIdConnectClient(object):
 
     def get_claims(self, id_token):
         claims = jwt.decode(id_token, verify=False)
+        logging.warning("MS Claim: '%s'" % (claims,))
         return claims
