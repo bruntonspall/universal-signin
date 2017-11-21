@@ -1,10 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Template App{% endblock %}
-{% block proposition %}Template Proposition{% endblock %}
+{% block title %}Universal Signin{% endblock %}
+{% block proposition %}Universal Signin{% endblock %}
 
 
 {% block links %}
-  <li><a href='/stuff'>stuff</a></li>
 {% endblock %}
 
 {% block content %}
@@ -12,10 +11,8 @@
   {% if logged_in %}
   <h1 class="heading-xlarge">Welcome {{email}}</h1>
   {% else %}
-  <h1 class="heading-xlarge">Welcome to Template app</h1>
+  <h1 class="heading-xlarge">Welcome to Universal Signin</h1>
   {% endif %}
-  <a class="button button-start" href="/test" role="button">Test</a>
-
   <form action="/login" method="post" class="form">
     <div class="form-section">
       <div class="form-group">
