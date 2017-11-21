@@ -9,8 +9,25 @@
 
 {% block content %}
 <main id="content" role="main">
+  {% if logged_in %}
+  <h1 class="heading-xlarge">Welcome {{email}}</h1>
+  {% else %}
   <h1 class="heading-xlarge">Welcome to Template app</h1>
-<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-<a class="button button-start" href="/somepath" role="button">Next</a>
+  {% endif %}
+  <a class="button button-start" href="/test" role="button">Test</a>
+
+  <form action="/login" method="post" class="form">
+    <div class="form-section">
+      <div class="form-group">
+        <label class="form-label" for="email">Email address</label>
+        <input class="form-control" name="email" type="text">
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="form-group">
+        <input class="button" type="submit" value="Login">
+      </div>
+    </div>
+  </form>
 </main>
 {% endblock %}

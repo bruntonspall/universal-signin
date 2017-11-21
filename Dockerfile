@@ -20,5 +20,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 EXPOSE 5000
-ENV FLASK_APP=app.py
+ENV FLASK_APP=app.py CLIENT_ID="client" CLIENT_SECRET="secret"
 CMD [ "flask", "run", "--host=0.0.0.0" ]
