@@ -11,6 +11,7 @@ class OpenIdConnectClient(object):
     def __init__(self, app):
         self.client_id = app.config["CLIENT_ID"]
         self.client_secret = app.config["CLIENT_SECRET"]
+        self.redirect_base = app.config["REDIRECT_BASE"]
 
     def detectGoogleSuite(self, domain):
         answers = list(dns.resolver.query(domain, 'MX'))
@@ -34,7 +35,7 @@ class OpenIdConnectClient(object):
          "client_id":self.client_id,
          "response_type":"code",
          "scope":"email",
-         "redirect_uri":"http://localhost:5000/oidc_callback",
+         "redirect_uri":"%s/oidc_callback" % (self.redirect_base,),
          "state":state,
          "nonce":"1",
          "hd":str(domain)
@@ -48,7 +49,7 @@ class OpenIdConnectClient(object):
         'code':code,
         'client_id':self.client_id,
         'client_secret':self.client_secret,
-        'redirect_uri':'http://localhost:5000/oidc_callback',
+        'redirect_uri':'%s/oidc_callback' % (self.redirect_base,),
         'grant_type':'authorization_code'
         }).json()
         access_token = resp['access_token']

@@ -5,7 +5,7 @@ import collections
 class TestGoogleClient(unittest.TestCase):
     def test_isGoogleDomain(self):
         App = collections.namedtuple('App', 'config')
-        app = App({"CLIENT_ID":"", "CLIENT_SECRET":""})
+        app = App({"CLIENT_ID":"", "CLIENT_SECRET":"", "REDIRECT_BASE": ""})
         client = google_openid.OpenIdConnectClient(app)
 
         self.assertTrue(client.detectGoogleSuite("brunton-spall.co.uk"))

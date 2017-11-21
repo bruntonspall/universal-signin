@@ -8,7 +8,7 @@ import os
 class OpenIdConnectClient(object):
     def __init__(self, app):
         self.client_id = app.config["MS_CLIENT_ID"]
-        # self.client_secret = app.config["MS_CLIENT_SECRET"]
+        self.redirect_base = app.config["REDIRECT_BASE"]
 
     def redirect(self, email):
         state = hashlib.sha256(os.urandom(1024)).hexdigest()
@@ -18,7 +18,7 @@ class OpenIdConnectClient(object):
          "response_type":"id_token",
          "response_mode":"form_post",
          "scope":"openid email",
-         "redirect_uri":"http://localhost:5000/ms_oidc_callback",
+         "redirect_uri":"%s/ms_oidc_callback" % (self.redirect_base,),
          "state":state,
          "nonce":"1",
          "login_hint": email
