@@ -6,6 +6,7 @@ from flask import render_template, request, session, redirect, abort
 import google_openid
 import microsoft_openid
 import dns.resolver
+import logging
 
 
 class Configuration(metaclass=MetaFlaskEnv):
@@ -40,7 +41,7 @@ def login():
         domain = email[email.find("@")+1:]
         if google.detectGoogleSuite(domain):
             return google.redirect(domain)
-        else:                
+        else:
             return microsoft.redirect(email)
     else:
         error = "Not a valid email address"
@@ -54,6 +55,9 @@ def microsoft_callback():
     if state != session['state']:
         abort(401)
     claims = microsoft.get_claims(id_token)
+    if 'email' not in claims:
+        claims['email'] = claims['tid']+'@'+claims['sub']
+    logging.warning("Log in from O365: %s" % (claims['email'],))
     return render_template('login.html', error=claims, email=claims['email'])
 
 @app.route('/oidc_callback')
@@ -63,4 +67,5 @@ def google_callback():
     if state != session['state']:
         abort(401)
     claims = google.get_claims(code)
+    logging.warning("Log in from G-Suite: %s" % (claims['email'],))
     return render_template('login.html', error=claims, email=claims['email'])
