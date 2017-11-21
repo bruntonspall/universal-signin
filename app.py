@@ -1,14 +1,11 @@
 from flask import Flask
 from flask_env import MetaFlaskEnv
 from flask import render_template, request, session, redirect, abort
-from google.auth import jwt
 
 # from flask.ext.oidc import OpenIDConnect
+import google_openid
 import dns.resolver
-import requests
-import hashlib
-import base64
-import os
+
 
 class Configuration(metaclass=MetaFlaskEnv):
     DEBUG = True # Turns on debugging features in Flask
@@ -16,6 +13,8 @@ class Configuration(metaclass=MetaFlaskEnv):
 
 app = Flask(__name__)
 app.config.from_object(Configuration)
+
+google = google_openid.OpenIdConnectClient(app)
 
 # This can all be moved to subapplication if things get complex
 @app.route('/')
@@ -41,20 +40,7 @@ def login():
         answers.sort(key=lambda x:x.preference)
         server = answers[0].exchange
         error = server
-        state = hashlib.sha256(os.urandom(1024)).hexdigest()
-        session['state'] = state
-        req = requests.Request('GET', "https://accounts.google.com/o/oauth2/auth", params={
-         "client_id":app.config["CLIENT_ID"],
-         "response_type":"code",
-         "scope":"email",
-         "redirect_uri":"http://localhost:5000/oidc_callback",
-         "state":state,
-         "nonce":"1",
-         "hd":str(domain)
-        })
-        url = requests.Session().prepare_request(req).url
-
-        return redirect(url)
+        return google.redirect(domain)
     else:
         error = "Not a valid email address"
 
@@ -66,13 +52,5 @@ def callback():
     code = request.args.get('code', '')
     if state != session['state']:
         abort(401)
-    resp = requests.post('https://accounts.google.com/o/oauth2/token', data={
-    'code':code,
-    'client_id':app.config["CLIENT_ID"],
-    'client_secret':app.config["CLIENT_SECRET"],
-    'redirect_uri':'http://localhost:5000/oidc_callback',
-    'grant_type':'authorization_code'
-    }).json()
-    access_token = resp['access_token']
-    claims = jwt.decode(resp['id_token'], verify=False)
-    return render_template('login.html', error=resp, email=claims['email'])
+    claims = google.get_claims(code)
+    return render_template('login.html', error=claims, email=claims['email'])
