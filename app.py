@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_env import MetaFlaskEnv
+from flask_basicauth import BasicAuth
 from flask import render_template, request, session, redirect, abort
 
 # from flask.ext.oidc import OpenIDConnect
@@ -15,6 +16,7 @@ class Configuration(metaclass=MetaFlaskEnv):
 
 app = Flask(__name__)
 app.config.from_object(Configuration)
+basic_auth = BasicAuth(app)
 
 google = google_openid.OpenIdConnectClient(app)
 microsoft = microsoft_openid.OpenIdConnectClient(app)
