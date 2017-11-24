@@ -3,3 +3,4 @@ Flask-Env
 dnspython
 requests
 google-auth
+Flask-BasicAuth
